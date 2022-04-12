@@ -1,5 +1,5 @@
 import { ZodError } from 'zod';
-import { Model } from '../interfaces/ModelInterface';
+import { Model } from '../interfaces';
 
 export interface ServiceError {
   error: ZodError;

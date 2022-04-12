@@ -1,4 +1,4 @@
-import { Car, CarSchema } from '../interfaces/CarInterface';
+import { Car, CarSchema } from '../interfaces';
 import Service, { ServiceError } from '.';
 import CarModel from '../models/Car';
 
@@ -14,6 +14,17 @@ class CarService extends Service<Car> {
 
     return this.model.create(obj);
   };
+
+  read = async (): Promise<Car[]> => this.model.read();
+
+  readOne = async (id: string): Promise<Car | ServiceError | null> =>
+    this.model.readOne(id);
+
+  update = async (id: string, obj: Car): Promise<Car | ServiceError | null> =>
+    this.model.update(id, obj);
+
+  delete = async (id: string): Promise<Car | null> =>
+    this.model.delete(id);
 }
 
 export default CarService;

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Controller, { RequestWithBody, ResponseError } from '.';
 import CarService from '../services/Car';
-import { Car } from '../interfaces/CarInterface';
+import { Car } from '../interfaces';
 
 class CarController extends Controller<Car> {
   private _route: string;
@@ -23,12 +23,11 @@ class CarController extends Controller<Car> {
     const { body } = req;
     try {
       const car = await this.service.create(body);
-      if (!car) {
-        return res.status(500).json({ error: this.errors.internal });
-      }
-      if ('error' in car) {
-        return res.status(400).json(car);
-      }
+
+      if (!car) return res.status(500).json({ error: this.errors.internal });
+
+      if ('error' in car) return res.status(400).json(car);
+
       return res.status(201).json(car);
     } catch (err) {
       return res.status(500).json({ error: this.errors.internal });
@@ -36,7 +35,7 @@ class CarController extends Controller<Car> {
   };
 
   read = async (
-    req: Request<{ id: string }>,
+    _req: Request,
     res: Response<Car[] | ResponseError>,
   ): Promise<typeof res> => {
     try {

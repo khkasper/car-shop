@@ -3,7 +3,7 @@ import App from './app';
 
 import CarController from './controllers/Car';
 
-import { Car } from './interfaces/CarInterface';
+import { Car } from './interfaces';
 
 const server = new App();
 
