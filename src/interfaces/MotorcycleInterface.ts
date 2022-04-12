@@ -9,7 +9,7 @@ const MotorcycleSchema = VehicleSchema.extend({
       required_error: 'Engine capacity is required',
       invalid_type_error: 'Engine capacity must be a number',
     })
-    .min(0, 'Engine capacity must be 0 or higher')
+    .min(1, 'Engine capacity must be 1 or higher')
     .max(2500, 'Engine capacity must be 2500 or lower'),
 });
 
