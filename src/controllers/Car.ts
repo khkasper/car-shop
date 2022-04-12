@@ -39,10 +39,8 @@ class CarController extends Controller<Car> {
     res: Response<Car[] | ResponseError>,
   ): Promise<typeof res> => {
     try {
-      const cars = await this.service.read();
-      return cars
-        ? res.json(cars)
-        : res.status(404).json({ error: this.errors.notFound });
+      const car = await this.service.read();
+      return res.status(200).json(car);
     } catch (error) {
       return res.status(500).json({ error: this.errors.internal });
     }
@@ -52,12 +50,20 @@ class CarController extends Controller<Car> {
     req: Request<{ id: string }>,
     res: Response<Car | ResponseError>,
   ): Promise<typeof res> => {
-    const { id } = req.params;
     try {
+      const { id } = req.params;
+
+      if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+        return res.status(400).json({ error: this.errors.invalidId });
+      }
+
       const car = await this.service.readOne(id);
-      return car
-        ? res.json(car)
-        : res.status(404).json({ error: this.errors.notFound });
+
+      if (!car) return res.status(404).json({ error: this.errors.notFound });
+
+      if ('error' in car) return res.status(400).json(car);
+
+      return res.json(car);
     } catch (error) {
       return res.status(500).json({ error: this.errors.internal });
     }
@@ -67,12 +73,20 @@ class CarController extends Controller<Car> {
     req: Request<{ id: string, obj: Car }>,
     res: Response<Car | ResponseError>,
   ): Promise<typeof res> => {
-    const { id } = req.params;
     try {
+      const { id } = req.params;
+
+      if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+        return res.status(400).json({ error: this.errors.invalidId });
+      }
+
       const car = await this.service.update(id, req.body);
-      return car
-        ? res.json(car)
-        : res.status(404).json({ error: this.errors.notFound });
+
+      if (!car) return res.status(404).json({ error: this.errors.notFound });
+
+      if ('error' in car) return res.status(400).json(car);
+      
+      return res.status(200).json(car);
     } catch (error) {
       return res.status(500).json({ error: this.errors.internal });
     }
@@ -84,10 +98,8 @@ class CarController extends Controller<Car> {
   ): Promise<typeof res> => {
     const { id } = req.params;
     try {
-      const car = await this.service.delete(id);
-      return car
-        ? res.json(car)
-        : res.status(404).json({ error: this.errors.notFound });
+      await this.service.delete(id);
+      return res.status(204);
     } catch (error) {
       return res.status(500).json({ error: this.errors.internal });
     }
