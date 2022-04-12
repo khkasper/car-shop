@@ -61,8 +61,6 @@ class CarController extends Controller<Car> {
 
       if (!car) return res.status(404).json({ error: this.errors.notFound });
 
-      if ('error' in car) return res.status(400).json(car);
-
       return res.json(car);
     } catch (error) {
       return res.status(500).json({ error: this.errors.internal });
@@ -79,8 +77,8 @@ class CarController extends Controller<Car> {
       if (!id.match(/^[0-9a-fA-F]{24}$/)) {
         return res.status(400).json({ error: this.errors.invalidId });
       }
-      console.log(req.body);
-      const car = await this.service.update(id, { ...req.body });
+
+      const car = await this.service.update(id, req.body);
 
       if (!car) return res.status(404).json({ error: this.errors.notFound });
       
