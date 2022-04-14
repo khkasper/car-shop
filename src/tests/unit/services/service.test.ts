@@ -6,7 +6,7 @@ import { validCarMock, coverageCarMock, updatedCarMock } from '../mocks';
 
 const carService = new CarService();
 
-describe('Testa os métodos do controller para a rota /cars', () => {
+describe('Testa os métodos do service para a rota /cars', () => {
   let result;
   describe('Testa se é possível listar todos os veículos (GET /cars)', () => {
 
