@@ -3,7 +3,7 @@ import Service, { ServiceError } from '.';
 import MotorcycleModel from '../models/Motorcycle';
 
 class MotorcycleService extends Service<Motorcycle> {
-  constructor(model = new MotorcycleModel()) {
+  constructor(public model = new MotorcycleModel()) {
     super(model);
   }
 

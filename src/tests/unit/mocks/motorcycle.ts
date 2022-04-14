@@ -16,3 +16,13 @@ export const coverageMotorcycleMock = {
   category: 'Street',
   engineCapacity: 125
 };
+
+export const updatedMotorcycleMock= {
+  _id: '625748f82d58a7817a3afc49',
+  model: 'Honda CG Titan 125',
+  year: 1963,
+  color: 'red',
+  buyValue: 4000,
+  category: 'Street',
+  engineCapacity: 125
+};

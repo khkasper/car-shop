@@ -1,5 +1,5 @@
 import { validCarMock, coverageCarMock, updatedCarMock } from './car';
-import { validMotorcycleMock, coverageMotorcycleMock } from './motorcycle';
+import { validMotorcycleMock, coverageMotorcycleMock, updatedMotorcycleMock } from './motorcycle';
 
 export {
   validCarMock,
@@ -7,4 +7,5 @@ export {
   updatedCarMock,
   validMotorcycleMock,
   coverageMotorcycleMock,
+  updatedMotorcycleMock,
 };

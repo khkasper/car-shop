@@ -1,6 +1,7 @@
-import { expect } from 'chai';
 import * as Sinon from 'sinon';
+import { expect } from 'chai';
 import { describe, it } from 'mocha';
+
 import CarModel from '../../../models/Car';
 import { validCarMock, coverageCarMock, updatedCarMock } from '../mocks';
 import { Car } from '../../../interfaces';

@@ -7,7 +7,7 @@ class MotorcycleController extends Controller<Motorcycle> {
   private _route: string;
 
   constructor(
-    service = new MotorcycleService(),
+    public service = new MotorcycleService(),
     route = '/motorcycles',
   ) {
     super(service);

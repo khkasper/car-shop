@@ -1,6 +1,7 @@
-import { expect } from 'chai';
 import * as Sinon from 'sinon';
+import { expect } from 'chai';
 import { describe, it } from 'mocha';
+
 import CarService from '../../../services/Car';
 import { validCarMock, coverageCarMock, updatedCarMock } from '../mocks';
 
@@ -11,7 +12,7 @@ describe('Testa os métodos do service para a rota /cars', () => {
   describe('Testa se é possível listar todos os veículos (GET /cars)', () => {
 
     before(async () => {
-      Sinon.stub(carService, 'read')
+      Sinon.stub(carService.model, 'read')
         .resolves([validCarMock]);
     });
 
