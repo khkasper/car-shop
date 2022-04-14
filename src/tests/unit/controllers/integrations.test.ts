@@ -35,7 +35,8 @@ describe('Testa a rota /cars', () => {
 
     before(async () => {
       Sinon.stub(carModel.model, 'find')
-        .resolves([validCarMock] as IResponseCar[]);
+        .onCall(0).resolves([validCarMock] as IResponseCar[])
+        .onCall(1).throws();
     });
 
     after(() => Sinon.restore());
@@ -51,13 +52,23 @@ describe('Testa a rota /cars', () => {
       expect(chaiHttpResponse.body[0]).to.be.an('object');
       expect(chaiHttpResponse.body[0]).to.be.deep.equal(validCarMock);
     });
+
+    it('Deve retornar um http status 500 caso haja algum erro interno', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .get('/cars');
+
+      expect(chaiHttpResponse).to.have.status(500);
+      expect(chaiHttpResponse.body.error).to.be.equal('Internal Server Error');
+    });
   });
 
   describe('Testa se é possível listar um veículo (GET /cars/:id)', () => {
 
     before(async () => {
       Sinon.stub(carModel.model, 'findOne')
-        .resolves(validCarMock as IResponseCar);
+        .onCall(0).resolves(validCarMock as IResponseCar)
+        .onCall(2).throws();
     });
 
     after(() => Sinon.restore());
@@ -71,13 +82,42 @@ describe('Testa a rota /cars', () => {
       expect(chaiHttpResponse.body).to.be.an('object');
       expect(chaiHttpResponse.body).to.be.deep.equal(validCarMock);
     });
+
+    it('Deve retornar um http status 400 se o id for inválido', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .get('/cars/625748f82d58a7817a3afc49a');
+
+      expect(chaiHttpResponse).to.have.status(400);
+      expect(chaiHttpResponse.body.error).to.be.equal('Id must have 24 hexadecimal characters');
+    });
+
+    it('Deve retornar um http status 404 se não encontrar um veículo', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .get('/cars/625748f82d58a7817a3afc48');
+
+      expect(chaiHttpResponse).to.have.status(404);
+      expect(chaiHttpResponse.body.error).to.be.equal('Object not found');
+    });
+
+    it('Deve retornar um http status 500 caso haja algum erro interno', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .get('/cars/625748f82d58a7817a3afc49');
+
+      expect(chaiHttpResponse).to.have.status(500);
+      expect(chaiHttpResponse.body.error).to.be.equal('Internal Server Error');
+    });
   });
 
   describe('Testa se é possível adicionar um veículo (POST /cars)', () => {
 
     before(async () => {
       Sinon.stub(carModel.model, 'create')
-        .resolves(validCarMock as IResponseCar);
+        .onCall(0).resolves(validCarMock as IResponseCar)
+        .onCall(1).throws()
+        .onCall(3).throws();
     });
 
     after(() => Sinon.restore());
@@ -92,13 +132,44 @@ describe('Testa a rota /cars', () => {
       expect(chaiHttpResponse.body).to.be.an('object');
       expect(chaiHttpResponse.body).to.be.deep.equal(validCarMock);
     });
+
+    it('Deve retornar um http status 500 se não for possível adicionar', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .post('/cars')
+        .send(coverageCarMock);
+
+      expect(chaiHttpResponse).to.have.status(500);
+      expect(chaiHttpResponse.body.error).to.be.equal('Internal Server Error');
+    });
+
+    it('Deve retornar um http status 400 caso falte algum campo', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .post('/cars')
+        .send({ ...coverageCarMock, model: undefined });
+
+      expect(chaiHttpResponse).to.have.status(400);
+      expect(chaiHttpResponse.body.error.name).to.be.equal('ZodError');
+    });
+
+    it('Deve retornar um http status 500 caso haja algum erro interno', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .post('/cars')
+        .send(coverageCarMock);
+
+      expect(chaiHttpResponse).to.have.status(500);
+      expect(chaiHttpResponse.body.error).to.be.equal('Internal Server Error');
+    });
   });
 
   describe('Testa se é possível editar/atualizar um veículo (PUT /cars/:id)', () => {
 
     before(async () => {
       Sinon.stub(carModel.model, 'findOneAndUpdate')
-        .resolves(updatedCarMock as IResponseCar);
+        .onCall(0).resolves(updatedCarMock as IResponseCar)
+        .onCall(2).throws();
     });
 
     after(() => Sinon.restore());
@@ -113,13 +184,44 @@ describe('Testa a rota /cars', () => {
       expect(chaiHttpResponse.body).to.be.an('object');
       expect(chaiHttpResponse.body).to.be.deep.equal(updatedCarMock);
     });
+
+    it('Deve retornar um http status 400 se o id for inválido', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .put('/cars/625748f82d58a7817a3afc49a')
+        .send({ ...coverageCarMock, buyValue: 4000 });
+
+      expect(chaiHttpResponse).to.have.status(400);
+      expect(chaiHttpResponse.body.error).to.be.equal('Id must have 24 hexadecimal characters');
+    });
+
+    it('Deve retornar um http status 404 se não encontrar um veículo ', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .put('/cars/625748f82d58a7817a3afc48')
+        .send({ ...coverageCarMock, buyValue: 4000 });
+
+      expect(chaiHttpResponse).to.have.status(404);
+      expect(chaiHttpResponse.body.error).to.be.equal('Object not found');
+    });
+
+    it('Deve retornar um http status 500 caso haja algum erro interno', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .put('/cars/625748f82d58a7817a3afc49')
+        .send({ ...coverageCarMock, buyValue: 4000 });
+
+      expect(chaiHttpResponse).to.have.status(500);
+      expect(chaiHttpResponse.body.error).to.be.equal('Internal Server Error');
+    });
   });
 
   describe('Testa se é possível deletar um veículo (DELETE /cars/:id)', () => {
 
     before(async () => {
       Sinon.stub(carModel.model, 'findOneAndDelete')
-        .resolves(validCarMock as IResponseCar);
+        .onCall(0).resolves(validCarMock as IResponseCar)
+        .onCall(2).throws();
     });
 
     after(() => Sinon.restore());
@@ -133,21 +235,49 @@ describe('Testa a rota /cars', () => {
       expect(chaiHttpResponse.body).to.be.an('object');
       expect(chaiHttpResponse.body).to.be.deep.equal({});
     });
+
+    it('Deve retornar um http status 400 se o id for inválido', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .delete('/cars/625748f82d58a7817a3afc49a');
+
+      expect(chaiHttpResponse).to.have.status(400);
+      expect(chaiHttpResponse.body.error).to.be.equal('Id must have 24 hexadecimal characters');
+    });
+
+    it('Deve retornar um http status 404 se não encontrar um veículo ', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .delete('/cars/625748f82d58a7817a3afc48');
+
+      expect(chaiHttpResponse).to.have.status(404);
+      expect(chaiHttpResponse.body.error).to.be.equal('Object not found');
+    });
+
+    it('Deve retornar um http status 500 caso haja algum erro interno', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .delete('/cars/625748f82d58a7817a3afc49');
+
+      expect(chaiHttpResponse).to.have.status(500);
+      expect(chaiHttpResponse.body.error).to.be.equal('Internal Server Error');
+    });
   });
 });
 
-describe('Testa a rota /motorcycle', () => {
+describe('Testa a rota /motorcycles', () => {
   let chaiHttpResponse;
-  describe('Testa se é possível listar todas as motos (GET /motorcycles)', () => {
+  describe('Testa se é possível listar todos os veículos (GET /motorcycles)', () => {
 
     before(async () => {
       Sinon.stub(motorcycleModel.model, 'find')
-        .resolves([validMotorcycleMock] as IResponseMotorcycle[]);
+        .onCall(0).resolves([validMotorcycleMock] as IResponseMotorcycle[])
+        .onCall(1).throws();
     });
 
     after(() => Sinon.restore());
 
-    it('Deve retornar um http status 200 e um array com as motos', async () => {
+    it('Deve retornar um http status 200 e um array com os veículos', async () => {
       chaiHttpResponse = await chai
         .request(app)
         .get('/motorcycles');
@@ -158,18 +288,28 @@ describe('Testa a rota /motorcycle', () => {
       expect(chaiHttpResponse.body[0]).to.be.an('object');
       expect(chaiHttpResponse.body[0]).to.be.deep.equal(validMotorcycleMock);
     });
+
+    it('Deve retornar um http status 500 caso haja algum erro interno', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .get('/motorcycles');
+
+      expect(chaiHttpResponse).to.have.status(500);
+      expect(chaiHttpResponse.body.error).to.be.equal('Internal Server Error');
+    });
   });
 
-  describe('Testa se é possível listar uma moto (GET /motorcycles/:id)', () => {
+  describe('Testa se é possível listar um veículo (GET /motorcycles/:id)', () => {
 
     before(async () => {
       Sinon.stub(motorcycleModel.model, 'findOne')
-        .resolves(validMotorcycleMock as IResponseMotorcycle);
+        .onCall(0).resolves(validMotorcycleMock as IResponseMotorcycle)
+        .onCall(2).throws();
     });
 
     after(() => Sinon.restore());
 
-    it('Deve retornar um http status 200 e um objeto com as informações da moto', async () => {
+    it('Deve retornar um http status 200 e um objeto com as informações do veículo', async () => {
       chaiHttpResponse = await chai
         .request(app)
         .get('/motorcycles/625748f82d58a7817a3afc49');
@@ -178,18 +318,47 @@ describe('Testa a rota /motorcycle', () => {
       expect(chaiHttpResponse.body).to.be.an('object');
       expect(chaiHttpResponse.body).to.be.deep.equal(validMotorcycleMock);
     });
+
+    it('Deve retornar um http status 400 se o id for inválido', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .get('/motorcycles/625748f82d58a7817a3afc49a');
+
+      expect(chaiHttpResponse).to.have.status(400);
+      expect(chaiHttpResponse.body.error).to.be.equal('Id must have 24 hexadecimal characters');
+    });
+
+    it('Deve retornar um http status 404 se não encontrar um veículo', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .get('/motorcycles/625748f82d58a7817a3afc48');
+
+      expect(chaiHttpResponse).to.have.status(404);
+      expect(chaiHttpResponse.body.error).to.be.equal('Object not found');
+    });
+
+    it('Deve retornar um http status 500 caso haja algum erro interno', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .get('/motorcycles/625748f82d58a7817a3afc49');
+
+      expect(chaiHttpResponse).to.have.status(500);
+      expect(chaiHttpResponse.body.error).to.be.equal('Internal Server Error');
+    });
   });
 
-  describe('Testa se é possível adicionar uma moto (POST /motorcycles)', () => {
+  describe('Testa se é possível adicionar um veículo (POST /motorcycles)', () => {
 
     before(async () => {
       Sinon.stub(motorcycleModel.model, 'create')
-        .resolves(validMotorcycleMock as IResponseMotorcycle);
+        .onCall(0).resolves(validMotorcycleMock as IResponseMotorcycle)
+        .onCall(1).throws()
+        .onCall(3).throws();
     });
 
     after(() => Sinon.restore());
 
-    it('Deve retornar um http status 201 e um objeto com as informações da moto', async () => {
+    it('Deve retornar um http status 201 e um objeto com as informações do veículo', async () => {
       chaiHttpResponse = await chai
         .request(app)
         .post('/motorcycles')
@@ -199,18 +368,49 @@ describe('Testa a rota /motorcycle', () => {
       expect(chaiHttpResponse.body).to.be.an('object');
       expect(chaiHttpResponse.body).to.be.deep.equal(validMotorcycleMock);
     });
+
+    it('Deve retornar um http status 500 se não for possível adicionar', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .post('/motorcycles')
+        .send(coverageMotorcycleMock);
+
+      expect(chaiHttpResponse).to.have.status(500);
+      expect(chaiHttpResponse.body.error).to.be.equal('Internal Server Error');
+    });
+
+    it('Deve retornar um http status 400 caso falte algum campo', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .post('/motorcycles')
+        .send({ ...coverageMotorcycleMock, model: undefined });
+
+      expect(chaiHttpResponse).to.have.status(400);
+      expect(chaiHttpResponse.body.error.name).to.be.equal('ZodError');
+    });
+
+    it('Deve retornar um http status 500 caso haja algum erro interno', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .post('/motorcycles')
+        .send(coverageMotorcycleMock);
+
+      expect(chaiHttpResponse).to.have.status(500);
+      expect(chaiHttpResponse.body.error).to.be.equal('Internal Server Error');
+    });
   });
 
-  describe('Testa se é possível editar/atualizar uma moto (PUT /motorcycles/:id)', () => {
+  describe('Testa se é possível editar/atualizar um veículo (PUT /motorcycles/:id)', () => {
 
     before(async () => {
       Sinon.stub(motorcycleModel.model, 'findOneAndUpdate')
-        .resolves(updatedMotorcycleMock as IResponseMotorcycle);
+        .onCall(0).resolves(updatedMotorcycleMock as IResponseMotorcycle)
+        .onCall(2).throws();
     });
 
     after(() => Sinon.restore());
 
-    it('Deve retornar um http status 200 e um objeto com as informações da moto', async () => {
+    it('Deve retornar um http status 200 e um objeto com as informações do veículo', async () => {
       chaiHttpResponse = await chai
         .request(app)
         .put('/motorcycles/625748f82d58a7817a3afc49')
@@ -220,13 +420,44 @@ describe('Testa a rota /motorcycle', () => {
       expect(chaiHttpResponse.body).to.be.an('object');
       expect(chaiHttpResponse.body).to.be.deep.equal(updatedMotorcycleMock);
     });
+
+    it('Deve retornar um http status 400 se o id for inválido', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .put('/motorcycles/625748f82d58a7817a3afc49a')
+        .send({ ...coverageMotorcycleMock, buyValue: 4000 });
+
+      expect(chaiHttpResponse).to.have.status(400);
+      expect(chaiHttpResponse.body.error).to.be.equal('Id must have 24 hexadecimal characters');
+    });
+
+    it('Deve retornar um http status 404 se não encontrar um veículo ', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .put('/motorcycles/625748f82d58a7817a3afc48')
+        .send({ ...coverageMotorcycleMock, buyValue: 4000 });
+
+      expect(chaiHttpResponse).to.have.status(404);
+      expect(chaiHttpResponse.body.error).to.be.equal('Object not found');
+    });
+
+    it('Deve retornar um http status 500 caso haja algum erro interno', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .put('/motorcycles/625748f82d58a7817a3afc49')
+        .send({ ...coverageMotorcycleMock, buyValue: 4000 });
+
+      expect(chaiHttpResponse).to.have.status(500);
+      expect(chaiHttpResponse.body.error).to.be.equal('Internal Server Error');
+    });
   });
 
-  describe('Testa se é possível deletar uma moto (DELETE /motorcycle/:id)', () => {
+  describe('Testa se é possível deletar um veículo (DELETE /motorcycles/:id)', () => {
 
     before(async () => {
       Sinon.stub(motorcycleModel.model, 'findOneAndDelete')
-        .resolves(validMotorcycleMock as IResponseMotorcycle);
+        .onCall(0).resolves(validMotorcycleMock as IResponseMotorcycle)
+        .onCall(2).throws();
     });
 
     after(() => Sinon.restore());
@@ -239,6 +470,33 @@ describe('Testa a rota /motorcycle', () => {
       expect(chaiHttpResponse).to.have.status(204);
       expect(chaiHttpResponse.body).to.be.an('object');
       expect(chaiHttpResponse.body).to.be.deep.equal({});
+    });
+
+    it('Deve retornar um http status 400 se o id for inválido', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .delete('/motorcycles/625748f82d58a7817a3afc49a');
+
+      expect(chaiHttpResponse).to.have.status(400);
+      expect(chaiHttpResponse.body.error).to.be.equal('Id must have 24 hexadecimal characters');
+    });
+
+    it('Deve retornar um http status 404 se não encontrar um veículo ', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .delete('/motorcycles/625748f82d58a7817a3afc48');
+
+      expect(chaiHttpResponse).to.have.status(404);
+      expect(chaiHttpResponse.body.error).to.be.equal('Object not found');
+    });
+
+    it('Deve retornar um http status 500 caso haja algum erro interno', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .delete('/motorcycles/625748f82d58a7817a3afc49');
+
+      expect(chaiHttpResponse).to.have.status(500);
+      expect(chaiHttpResponse.body.error).to.be.equal('Internal Server Error');
     });
   });
 });

@@ -22,15 +22,13 @@ class MotorcycleController extends Controller<Motorcycle> {
   ): Promise<typeof res> => {
     const { body } = req;
     try {
-      const motorcycle = await this.service.create(body);
+      const moto = await this.service.create(body);
 
-      if (!motorcycle) {
-        return res.status(500).json({ error: this.errors.internal });
-      }
+      if (!moto) return res.status(500).json({ error: this.errors.internal });
 
-      if ('error' in motorcycle) return res.status(400).json(motorcycle);
+      if ('error' in moto) return res.status(400).json(moto);
 
-      return res.status(201).json(motorcycle);
+      return res.status(201).json(moto);
     } catch (err) {
       return res.status(500).json({ error: this.errors.internal });
     }
@@ -41,8 +39,8 @@ class MotorcycleController extends Controller<Motorcycle> {
     res: Response<Motorcycle[] | ResponseError>,
   ): Promise<typeof res> => {
     try {
-      const motorcycles = await this.service.read();
-      return res.status(200).json(motorcycles);
+      const motos = await this.service.read();
+      return res.status(200).json(motos);
     } catch (error) {
       return res.status(500).json({ error: this.errors.internal });
     }
@@ -58,13 +56,11 @@ class MotorcycleController extends Controller<Motorcycle> {
         return res.status(400).json({ error: this.errors.invalidId });
       }
 
-      const motorcycle = await this.service.readOne(id);
+      const moto = await this.service.readOne(id);
 
-      if (!motorcycle) {
-        return res.status(404).json({ error: this.errors.notFound });
-      }
-
-      return res.json(motorcycle);
+      return moto
+        ? res.status(200).json(moto)
+        : res.status(404).json({ error: this.errors.notFound });
     } catch (error) {
       return res.status(500).json({ error: this.errors.internal });
     }
@@ -80,13 +76,11 @@ class MotorcycleController extends Controller<Motorcycle> {
         return res.status(400).json({ error: this.errors.invalidId });
       }
 
-      const motorcycle = await this.service.update(id, req.body);
+      const moto = await this.service.update(id, req.body);
 
-      if (!motorcycle) {
-        return res.status(404).json({ error: this.errors.notFound });
-      }
-
-      return res.status(200).json(motorcycle);
+      return moto
+        ? res.status(200).json(moto)
+        : res.status(404).json({ error: this.errors.notFound });
     } catch (error) {
       return res.status(500).json({ error: this.errors.internal });
     }
@@ -102,13 +96,11 @@ class MotorcycleController extends Controller<Motorcycle> {
         return res.status(400).json({ error: this.errors.invalidId });
       }
 
-      const motorcycle = await this.service.delete(id);
+      const moto = await this.service.delete(id);
 
-      if (!motorcycle) {
-        return res.status(404).json({ error: this.errors.notFound });
-      }
-
-      return res.status(204).json();
+      return moto
+        ? res.status(204).json()
+        : res.status(404).json({ error: this.errors.notFound });
     } catch (error) {
       return res.status(500).json({ error: this.errors.internal });
     }

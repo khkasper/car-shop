@@ -58,9 +58,9 @@ class CarController extends Controller<Car> {
 
       const car = await this.service.readOne(id);
 
-      if (!car) return res.status(404).json({ error: this.errors.notFound });
-
-      return res.json(car);
+      return car
+        ? res.status(200).json(car)
+        : res.status(404).json({ error: this.errors.notFound });
     } catch (error) {
       return res.status(500).json({ error: this.errors.internal });
     }
@@ -78,9 +78,9 @@ class CarController extends Controller<Car> {
 
       const car = await this.service.update(id, req.body);
 
-      if (!car) return res.status(404).json({ error: this.errors.notFound });
-      
-      return res.status(200).json(car);
+      return car
+        ? res.status(200).json(car)
+        : res.status(404).json({ error: this.errors.notFound });
     } catch (error) {
       return res.status(500).json({ error: this.errors.internal });
     }
@@ -98,9 +98,9 @@ class CarController extends Controller<Car> {
 
       const car = await this.service.delete(id);
 
-      if (!car) return res.status(404).json({ error: this.errors.notFound });
-
-      return res.status(204).json();
+      return car
+        ? res.status(204).json()
+        : res.status(404).json({ error: this.errors.notFound });
     } catch (error) {
       return res.status(500).json({ error: this.errors.internal });
     }
