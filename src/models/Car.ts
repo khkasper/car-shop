@@ -15,7 +15,7 @@ const carSchema = new Schema<CarDocument>({
 }, { versionKey: false });
 
 class CarModel extends MongoModel<Car> {
-  constructor(model = createModel('CarShop', carSchema)) {
+  constructor(public model = createModel('CarShop', carSchema)) {
     super(model);
   }
 }
