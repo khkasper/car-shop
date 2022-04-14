@@ -4,13 +4,13 @@ import * as Sinon from 'sinon';
 import { describe, it } from 'mocha';
 import server from '../../../server';
 import CarModel from '../../../models/Car';
-import { validCarMock, coverageCarMock } from '../mocks';
+import { validCarMock, coverageCarMock, updatedCarMock } from '../mocks';
 import { Car } from '../../../interfaces';
 import { Document } from 'mongoose';
 
 const { expect } = chai;
 const app = server.getApp();
-let carModel = new CarModel();
+const carModel = new CarModel();
 
 interface IValidCarMock extends Car {
   _id: string;
@@ -89,7 +89,7 @@ describe('Testa os métodos do controller para a rota /cars', () => {
 
     before(async () => {
       Sinon.stub(carModel.model, 'findOneAndUpdate')
-        .resolves(validCarMock as IResponse);
+        .resolves(updatedCarMock as IResponse);
     });
 
     after(() => Sinon.restore());
@@ -98,11 +98,11 @@ describe('Testa os métodos do controller para a rota /cars', () => {
       chaiHttpResponse = await chai
         .request(app)
         .put('/cars/625748f82d58a7817a3afc49')
-        .send(coverageCarMock);
+        .send({ ...coverageCarMock, buyValue: 4000 });
 
       expect(chaiHttpResponse).to.have.status(200);
       expect(chaiHttpResponse.body).to.be.an('object');
-      expect(chaiHttpResponse.body).to.be.deep.equal(validCarMock);
+      expect(chaiHttpResponse.body).to.be.deep.equal(updatedCarMock);
     });
   });
 
